@@ -66,7 +66,7 @@ static OFC_VOID PopulateResults (BOOKMARK_FILE *bookmark_file,
    * Realloc to hold all.  We'll shrink it after we filter
    */
   bookmark_file->bookmark_elements = 
-    BlueHeapRealloc (bookmark_file->bookmark_elements,
+    ofc_realloc (bookmark_file->bookmark_elements,
 		     (old_count+search_count) * sizeof (BOOKMARK_ELEMENT)) ;
 
   for (i = 0 ; i < search_count ; i++)
@@ -79,7 +79,7 @@ static OFC_VOID PopulateResults (BOOKMARK_FILE *bookmark_file,
 	bookmark_file->bookmark_elements[bookmark_file->search_count].hidden =
 	  OFC_TRUE ;
 
-      BlueCtstrncpy 
+      ofc_tstrncpy
 	(bookmark_file->
 	 bookmark_elements[bookmark_file->search_count++].bookmark,
 	 element, BOOKMARK_ELEMENT_LEN) ;
@@ -96,9 +96,9 @@ static OFC_INT FindSpot (BOOKMARK_ELEMENT *new_elements, OFC_INT new_count,
   found = OFC_FALSE ;
   i = 0 ;
 
-  while (i < new_count && BlueCtstrncmp ((OFC_TCHAR *) old_element->bookmark, 
-					new_elements[i].bookmark, 
-					BOOKMARK_ELEMENT_LEN) > 0)
+  while (i < new_count && ofc_tstrncmp ((OFC_TCHAR *) old_element->bookmark,
+                                        new_elements[i].bookmark,
+                                        BOOKMARK_ELEMENT_LEN) > 0)
     i++ ;
 
   return (i) ;
@@ -113,9 +113,9 @@ static OFC_VOID PushElements (BOOKMARK_ELEMENT *new_elements,
   for (count = new_count ; count > new_index ; count--)
     {
       new_elements[count].hidden = new_elements[count-1].hidden ;
-      BlueCtstrncpy (new_elements[count].bookmark,
-		     new_elements[count-1].bookmark,
-		     BOOKMARK_ELEMENT_LEN) ;
+      ofc_tstrncpy (new_elements[count].bookmark,
+                    new_elements[count-1].bookmark,
+                    BOOKMARK_ELEMENT_LEN) ;
     }
 }
 
@@ -130,8 +130,8 @@ static OFC_VOID SortResults (BOOKMARK_FILE *bookmark_file)
    * First, create a new bookmark elements array
    */
   DBG_ENTRY() ;
-  new_elements = BlueHeapMalloc (bookmark_file->search_count * 
-				 sizeof (BOOKMARK_ELEMENT)) ;
+  new_elements = ofc_malloc (bookmark_file->search_count *
+                             sizeof (BOOKMARK_ELEMENT)) ;
 
   new_count = 0 ;
   for (old_index = 0 ; old_index < bookmark_file->search_count ; old_index++)
@@ -149,9 +149,9 @@ static OFC_VOID SortResults (BOOKMARK_FILE *bookmark_file)
        * new_index < new_count 
        */
       if (new_index == new_count ||
-	  BlueCtstrncmp (bookmark_file->bookmark_elements[old_index].bookmark,
-			 new_elements[new_index].bookmark,
-			 BOOKMARK_ELEMENT_LEN) != 0)
+              ofc_tstrncmp (bookmark_file->bookmark_elements[old_index].bookmark,
+                            new_elements[new_index].bookmark,
+                            BOOKMARK_ELEMENT_LEN) != 0)
 	{
 	  /*
 	   * We want to add the element.
@@ -167,9 +167,9 @@ static OFC_VOID SortResults (BOOKMARK_FILE *bookmark_file)
 	  /*
 	   * Now insert the old element
 	   */
-	  BlueCtstrncpy (new_elements[new_index].bookmark,
-			 bookmark_file->bookmark_elements[old_index].bookmark,
-			 BOOKMARK_ELEMENT_LEN) ;
+	  ofc_tstrncpy (new_elements[new_index].bookmark,
+                    bookmark_file->bookmark_elements[old_index].bookmark,
+                    BOOKMARK_ELEMENT_LEN) ;
 	  new_elements[new_index].hidden =
 	    bookmark_file->bookmark_elements[old_index].hidden ;
 	  /*
@@ -178,7 +178,7 @@ static OFC_VOID SortResults (BOOKMARK_FILE *bookmark_file)
 	  new_count++ ;
 	}
     }
-  BlueHeapFree (bookmark_file->bookmark_elements) ;
+  ofc_free (bookmark_file->bookmark_elements) ;
   bookmark_file->bookmark_elements = new_elements ;
   bookmark_file->search_count = new_count ;
   DBG_EXIT() ;
@@ -194,9 +194,9 @@ static OFC_VOID ReturnNext (OFC_LPWIN32_FIND_DATAW lpFindFileData,
   bookmark_element = 
     &bookmark_file->bookmark_elements[bookmark_file->search_index] ;
 
-  BlueCtstrncpy (lpFindFileData->cFileName, bookmark_element->bookmark,
+  ofc_tstrncpy (lpFindFileData->cFileName, bookmark_element->bookmark,
 		 BOOKMARK_ELEMENT_LEN-3) ;
-  len = BlueCtstrnlen (lpFindFileData->cFileName, BOOKMARK_ELEMENT_LEN-3) ;
+  len = ofc_tstrnlen (lpFindFileData->cFileName, BOOKMARK_ELEMENT_LEN - 3) ;
   lpFindFileData->cFileName[len] = TCHAR(':') ;
   lpFindFileData->cFileName[len+1] = TCHAR('/') ;
   lpFindFileData->cFileName[len+2] = TCHAR_EOS ;
@@ -223,7 +223,7 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
   hFile = OFC_INVALID_HANDLE_VALUE ;
   *more = OFC_FALSE ;
 
-  bookmark_file = BlueHeapMalloc (sizeof (BOOKMARK_FILE)) ;
+  bookmark_file = ofc_malloc (sizeof (BOOKMARK_FILE)) ;
   if (bookmark_file == OFC_NULL)
     {
       BlueThreadSetVariable (OfcLastError, 
@@ -237,7 +237,7 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
 
       bookmark_maps = ofc_framework_get_maps() ;
       PopulateResults (bookmark_file, bookmark_maps) ;
-      BlueHeapFree (bookmark_maps) ;
+      ofc_free (bookmark_maps) ;
 
       SortResults (bookmark_file) ;
       
@@ -255,8 +255,8 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
 
       if (hFile == OFC_INVALID_HANDLE_VALUE)
 	{
-	  BlueHeapFree (bookmark_file->bookmark_elements) ;
-	  BlueHeapFree (bookmark_file) ;
+	  ofc_free (bookmark_file->bookmark_elements) ;
+	  ofc_free (bookmark_file) ;
 	}
     }
 
@@ -306,8 +306,8 @@ BlueFSBookmarksFindClose (OFC_HANDLE hFindFile)
   if (bookmark_file != OFC_NULL)
     {
       ret = OFC_TRUE ;
-      BlueHeapFree(bookmark_file->bookmark_elements) ;
-      BlueHeapFree (bookmark_file) ;
+      ofc_free(bookmark_file->bookmark_elements) ;
+      ofc_free (bookmark_file) ;
       ofc_handle_destroy (hFindFile) ;
       ofc_handle_unlock (hFindFile) ;
     }
@@ -372,7 +372,7 @@ static OFC_FILE_FSINFO BlueFSBookmarksInfo =
 OFC_VOID 
 BlueFSBookmarksStartup (OFC_VOID)
 {
-  BLUE_PATH *path ;
+  OFC_PATH *path ;
 
   ofc_fs_register (OFC_FST_BOOKMARKS, &BlueFSBookmarksInfo) ;
   /*
@@ -380,19 +380,19 @@ BlueFSBookmarksStartup (OFC_VOID)
    * BROWSE:/ to the redirector.  When someone does a find first with the
    * browse path, it will come in here
    */
-  path = BluePathCreateW (TSTR("")) ;
+  path = ofc_path_createW (TSTR("")) ;
   if (path == OFC_NULL)
-    BlueCprintf ("Couldn't Create Bookmarks Path\n") ;
+    ofc_printf ("Couldn't Create Bookmarks Path\n") ;
   else
     {
-      BluePathAddMapW (TSTR("Bookmarks"), TSTR("Bookmarks"), path,
-                       OFC_FST_BOOKMARKS, OFC_TRUE) ;
+      ofc_path_add_mapW (TSTR("Bookmarks"), TSTR("Bookmarks"), path,
+                         OFC_FST_BOOKMARKS, OFC_TRUE) ;
     }
 }
 
 OFC_VOID 
 BlueFSBookmarksShutdown (OFC_VOID)
 {
-  BluePathDeleteMapW (TSTR("Bookmarks"));
+  ofc_path_delete_mapW (TSTR("Bookmarks"));
 }
 
