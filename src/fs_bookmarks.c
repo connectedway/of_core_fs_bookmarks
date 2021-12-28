@@ -41,7 +41,7 @@ typedef struct
   /**
    * The Client Handle from the lower layer
    */
-  BLUE_HANDLE hFile ;
+  OFC_HANDLE hFile ;
   /*
    * Other data used for an open directory for listing contents
    */
@@ -51,7 +51,7 @@ typedef struct
 } BOOKMARK_FILE ;
 
 static OFC_VOID PopulateResults (BOOKMARK_FILE *bookmark_file,
-				  BLUE_FRAMEWORK_MAPS *maps) 
+                                 OFC_FRAMEWORK_MAPS *maps)
 {
   OFC_INT i ;
   OFC_INT old_count ;
@@ -75,7 +75,7 @@ static OFC_VOID PopulateResults (BOOKMARK_FILE *bookmark_file,
       
       bookmark_file->bookmark_elements[bookmark_file->search_count].hidden =
 	OFC_FALSE ;
-      if (maps->map[i].type != BLUE_FS_FILE)
+      if (maps->map[i].type != OFC_FST_FILE)
 	bookmark_file->bookmark_elements[bookmark_file->search_count].hidden =
 	  OFC_TRUE ;
 
@@ -211,16 +211,16 @@ static OFC_VOID ReturnNext (OFC_LPWIN32_FIND_DATAW lpFindFileData,
   DBG_EXIT() ;
 }
 
-static BLUE_HANDLE
+static OFC_HANDLE
 BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
 			  OFC_LPWIN32_FIND_DATAW lpFindFileData,
 			  OFC_BOOL *more)
 {
-  BLUE_HANDLE hFile ;
+  OFC_HANDLE hFile ;
   BOOKMARK_FILE *bookmark_file ;
-  BLUE_FRAMEWORK_MAPS *bookmark_maps ;
+  OFC_FRAMEWORK_MAPS *bookmark_maps ;
 				 
-  hFile = BLUE_INVALID_HANDLE_VALUE ;
+  hFile = OFC_INVALID_HANDLE_VALUE ;
   *more = OFC_FALSE ;
 
   bookmark_file = BlueHeapMalloc (sizeof (BOOKMARK_FILE)) ;
@@ -235,7 +235,7 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
       bookmark_file->bookmark_elements = OFC_NULL ;
       bookmark_file->search_index = 0 ;
 
-      bookmark_maps = BlueFrameworkGetMaps() ;
+      bookmark_maps = ofc_framework_get_maps() ;
       PopulateResults (bookmark_file, bookmark_maps) ;
       BlueHeapFree (bookmark_maps) ;
 
@@ -244,8 +244,8 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
       if (bookmark_file->search_index < bookmark_file->search_count)
 	{
 	  ReturnNext (lpFindFileData, bookmark_file, more) ;
-	  hFile = BlueHandleCreate 
-	    (BLUE_HANDLE_FSBOOKMARK_FILE, bookmark_file) ;
+	  hFile = ofc_handle_create
+	    (OFC_HANDLE_FSBOOKMARK_FILE, bookmark_file) ;
 	}
       else
 	{
@@ -253,7 +253,7 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
 				 (OFC_DWORD_PTR) OFC_ERROR_NO_MORE_FILES) ;
 	}
 
-      if (hFile == BLUE_INVALID_HANDLE_VALUE)
+      if (hFile == OFC_INVALID_HANDLE_VALUE)
 	{
 	  BlueHeapFree (bookmark_file->bookmark_elements) ;
 	  BlueHeapFree (bookmark_file) ;
@@ -264,16 +264,16 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
 }
 
 static OFC_BOOL
-BlueFSBookmarksFindNext (BLUE_HANDLE hFindFile,
-			 OFC_LPWIN32_FIND_DATAW lpFindFileData,
-			 OFC_BOOL *more)
+BlueFSBookmarksFindNext (OFC_HANDLE hFindFile,
+                         OFC_LPWIN32_FIND_DATAW lpFindFileData,
+                         OFC_BOOL *more)
 {
   OFC_BOOL ret ;
   BOOKMARK_FILE *bookmark_file ;
 
   ret = OFC_FALSE ;
 
-  bookmark_file = BlueHandleLock (hFindFile) ;
+  bookmark_file = ofc_handle_lock (hFindFile) ;
   if (bookmark_file != OFC_NULL)
     {
       *more = OFC_FALSE ;
@@ -288,28 +288,28 @@ BlueFSBookmarksFindNext (BLUE_HANDLE hFindFile,
 				 (OFC_DWORD_PTR) OFC_ERROR_NO_MORE_FILES) ;
 	}
 
-      BlueHandleUnlock (hFindFile) ;
+      ofc_handle_unlock (hFindFile) ;
     }
 
   return (ret) ;
 }
 
 static OFC_BOOL
-BlueFSBookmarksFindClose (BLUE_HANDLE hFindFile) 
+BlueFSBookmarksFindClose (OFC_HANDLE hFindFile)
 {
   OFC_BOOL ret ;
   BOOKMARK_FILE *bookmark_file ;
 
   ret = OFC_FALSE ;
 
-  bookmark_file = BlueHandleLock (hFindFile) ;
+  bookmark_file = ofc_handle_lock (hFindFile) ;
   if (bookmark_file != OFC_NULL)
     {
       ret = OFC_TRUE ;
       BlueHeapFree(bookmark_file->bookmark_elements) ;
       BlueHeapFree (bookmark_file) ;
-      BlueHandleDestroy (hFindFile) ;
-      BlueHandleUnlock (hFindFile) ;
+      ofc_handle_destroy (hFindFile) ;
+      ofc_handle_unlock (hFindFile) ;
     }
   return (ret) ;
 }
@@ -336,7 +336,7 @@ BlueFSBookmarksGetAttributesEx (OFC_LPCTSTR lpFileName,
   return (ret) ;
 }
 
-static BLUE_FILE_FSINFO BlueFSBookmarksInfo =
+static OFC_FILE_FSINFO BlueFSBookmarksInfo =
   {
     OFC_NULL,
     OFC_NULL,
@@ -374,7 +374,7 @@ BlueFSBookmarksStartup (OFC_VOID)
 {
   BLUE_PATH *path ;
 
-  BlueFSRegister (BLUE_FS_BOOKMARKS, &BlueFSBookmarksInfo) ;
+  ofc_fs_register (OFC_FST_BOOKMARKS, &BlueFSBookmarksInfo) ;
   /*
    * Create a path for the IPC service.  This will add the pattern:
    * BROWSE:/ to the redirector.  When someone does a find first with the
@@ -385,8 +385,8 @@ BlueFSBookmarksStartup (OFC_VOID)
     BlueCprintf ("Couldn't Create Bookmarks Path\n") ;
   else
     {
-      BluePathAddMapW (TSTR("Bookmarks"), TSTR("Bookmarks"), path, 
-		       BLUE_FS_BOOKMARKS, OFC_TRUE) ;
+      BluePathAddMapW (TSTR("Bookmarks"), TSTR("Bookmarks"), path,
+                       OFC_FST_BOOKMARKS, OFC_TRUE) ;
     }
 }
 
