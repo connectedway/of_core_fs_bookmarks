@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.21.1)
 project(of_core_fs_bookmarks VERSION 1.0.1 DESCRIPTION "OpenFiles File Handler for Bookmarks")
 
 include_directories(
-	${of_core_BINARY_DIR}
 	${of_core_SOURCE_DIR}/include
 	include
 	)
