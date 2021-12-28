@@ -29,8 +29,8 @@
 #define BOOKMARK_ELEMENT_LEN 16
 typedef struct
 {
-  BLUE_BOOL hidden ;
-  BLUE_TCHAR bookmark[BOOKMARK_ELEMENT_LEN] ;
+  OFC_BOOL hidden ;
+  OFC_TCHAR bookmark[BOOKMARK_ELEMENT_LEN] ;
 } BOOKMARK_ELEMENT ;
 
 /**
@@ -45,18 +45,18 @@ typedef struct
   /*
    * Other data used for an open directory for listing contents
    */
-  BLUE_UINT16 search_count ;
-  BLUE_UINT16 search_index ;
+  OFC_UINT16 search_count ;
+  OFC_UINT16 search_index ;
   BOOKMARK_ELEMENT *bookmark_elements ;
 } BOOKMARK_FILE ;
 
-static BLUE_VOID PopulateResults (BOOKMARK_FILE *bookmark_file,
+static OFC_VOID PopulateResults (BOOKMARK_FILE *bookmark_file,
 				  BLUE_FRAMEWORK_MAPS *maps) 
 {
-  BLUE_INT i ;
-  BLUE_INT old_count ;
-  BLUE_INT search_count ;
-  BLUE_TCHAR *element ;
+  OFC_INT i ;
+  OFC_INT old_count ;
+  OFC_INT search_count ;
+  OFC_TCHAR *element ;
 
   DBG_ENTRY() ;
   old_count = bookmark_file->search_count ;
@@ -74,10 +74,10 @@ static BLUE_VOID PopulateResults (BOOKMARK_FILE *bookmark_file,
       element = maps->map[i].prefix ;
       
       bookmark_file->bookmark_elements[bookmark_file->search_count].hidden =
-	BLUE_FALSE ;
+	OFC_FALSE ;
       if (maps->map[i].type != BLUE_FS_FILE)
 	bookmark_file->bookmark_elements[bookmark_file->search_count].hidden =
-	  BLUE_TRUE ;
+	  OFC_TRUE ;
 
       BlueCtstrncpy 
 	(bookmark_file->
@@ -87,16 +87,16 @@ static BLUE_VOID PopulateResults (BOOKMARK_FILE *bookmark_file,
   DBG_EXIT() ;
 }
 
-static BLUE_INT FindSpot (BOOKMARK_ELEMENT *new_elements, BLUE_INT new_count,
+static OFC_INT FindSpot (BOOKMARK_ELEMENT *new_elements, OFC_INT new_count,
 			  BOOKMARK_ELEMENT *old_element)
 {
-  BLUE_BOOL found ;
-  BLUE_INT i ;
+  OFC_BOOL found ;
+  OFC_INT i ;
 
-  found = BLUE_FALSE ;
+  found = OFC_FALSE ;
   i = 0 ;
 
-  while (i < new_count && BlueCtstrncmp ((BLUE_TCHAR *) old_element->bookmark, 
+  while (i < new_count && BlueCtstrncmp ((OFC_TCHAR *) old_element->bookmark, 
 					new_elements[i].bookmark, 
 					BOOKMARK_ELEMENT_LEN) > 0)
     i++ ;
@@ -104,11 +104,11 @@ static BLUE_INT FindSpot (BOOKMARK_ELEMENT *new_elements, BLUE_INT new_count,
   return (i) ;
 }
 
-static BLUE_VOID PushElements (BOOKMARK_ELEMENT *new_elements, 
-			       BLUE_INT new_index, 
-			       BLUE_INT new_count)
+static OFC_VOID PushElements (BOOKMARK_ELEMENT *new_elements, 
+			       OFC_INT new_index, 
+			       OFC_INT new_count)
 {
-  BLUE_INT count ;
+  OFC_INT count ;
 
   for (count = new_count ; count > new_index ; count--)
     {
@@ -119,11 +119,11 @@ static BLUE_VOID PushElements (BOOKMARK_ELEMENT *new_elements,
     }
 }
 
-static BLUE_VOID SortResults (BOOKMARK_FILE *bookmark_file)
+static OFC_VOID SortResults (BOOKMARK_FILE *bookmark_file)
 {
-  BLUE_INT old_index ;
-  BLUE_INT new_count ;
-  BLUE_INT new_index ;
+  OFC_INT old_index ;
+  OFC_INT new_count ;
+  OFC_INT new_index ;
   BOOKMARK_ELEMENT *new_elements ;
 
   /*
@@ -184,10 +184,10 @@ static BLUE_VOID SortResults (BOOKMARK_FILE *bookmark_file)
   DBG_EXIT() ;
 }
 
-static BLUE_VOID ReturnNext (BLUE_LPWIN32_FIND_DATAW lpFindFileData,
-			     BOOKMARK_FILE *bookmark_file, BLUE_BOOL *more)
+static OFC_VOID ReturnNext (OFC_LPWIN32_FIND_DATAW lpFindFileData,
+			     BOOKMARK_FILE *bookmark_file, OFC_BOOL *more)
 {
-  BLUE_SIZET len ;
+  OFC_SIZET len ;
   BOOKMARK_ELEMENT *bookmark_element ;
 
   DBG_ENTRY() ;
@@ -201,38 +201,38 @@ static BLUE_VOID ReturnNext (BLUE_LPWIN32_FIND_DATAW lpFindFileData,
   lpFindFileData->cFileName[len+1] = TCHAR('/') ;
   lpFindFileData->cFileName[len+2] = TCHAR_EOS ;
 
-  lpFindFileData->dwFileAttributes = BLUE_FILE_ATTRIBUTE_DIRECTORY |
-    BLUE_FILE_ATTRIBUTE_BOOKMARK ;
+  lpFindFileData->dwFileAttributes = OFC_FILE_ATTRIBUTE_DIRECTORY |
+    OFC_FILE_ATTRIBUTE_BOOKMARK ;
   if (bookmark_element->hidden)
-    lpFindFileData->dwFileAttributes |= BLUE_FILE_ATTRIBUTE_HIDDEN ;
+    lpFindFileData->dwFileAttributes |= OFC_FILE_ATTRIBUTE_HIDDEN ;
   bookmark_file->search_index++ ;
   if (bookmark_file->search_index < bookmark_file->search_count)
-    *more = BLUE_TRUE ;
+    *more = OFC_TRUE ;
   DBG_EXIT() ;
 }
 
 static BLUE_HANDLE
-BlueFSBookmarksFindFirst (BLUE_LPCTSTR lpFileName,
-			  BLUE_LPWIN32_FIND_DATAW lpFindFileData,
-			  BLUE_BOOL *more)
+BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
+			  OFC_LPWIN32_FIND_DATAW lpFindFileData,
+			  OFC_BOOL *more)
 {
   BLUE_HANDLE hFile ;
   BOOKMARK_FILE *bookmark_file ;
   BLUE_FRAMEWORK_MAPS *bookmark_maps ;
 				 
   hFile = BLUE_INVALID_HANDLE_VALUE ;
-  *more = BLUE_FALSE ;
+  *more = OFC_FALSE ;
 
   bookmark_file = BlueHeapMalloc (sizeof (BOOKMARK_FILE)) ;
-  if (bookmark_file == BLUE_NULL)
+  if (bookmark_file == OFC_NULL)
     {
-      BlueThreadSetVariable (BlueLastError, 
-			     (BLUE_DWORD_PTR) BLUE_ERROR_NOT_ENOUGH_MEMORY) ;
+      BlueThreadSetVariable (OfcLastError, 
+			     (OFC_DWORD_PTR) OFC_ERROR_NOT_ENOUGH_MEMORY) ;
     }
   else
     {
       bookmark_file->search_count = 0 ;
-      bookmark_file->bookmark_elements = BLUE_NULL ;
+      bookmark_file->bookmark_elements = OFC_NULL ;
       bookmark_file->search_index = 0 ;
 
       bookmark_maps = BlueFrameworkGetMaps() ;
@@ -249,8 +249,8 @@ BlueFSBookmarksFindFirst (BLUE_LPCTSTR lpFileName,
 	}
       else
 	{
-	  BlueThreadSetVariable (BlueLastError, 
-				 (BLUE_DWORD_PTR) BLUE_ERROR_NO_MORE_FILES) ;
+	  BlueThreadSetVariable (OfcLastError, 
+				 (OFC_DWORD_PTR) OFC_ERROR_NO_MORE_FILES) ;
 	}
 
       if (hFile == BLUE_INVALID_HANDLE_VALUE)
@@ -263,29 +263,29 @@ BlueFSBookmarksFindFirst (BLUE_LPCTSTR lpFileName,
   return (hFile) ;
 }
 
-static BLUE_BOOL
+static OFC_BOOL
 BlueFSBookmarksFindNext (BLUE_HANDLE hFindFile,
-			 BLUE_LPWIN32_FIND_DATAW lpFindFileData,
-			 BLUE_BOOL *more)
+			 OFC_LPWIN32_FIND_DATAW lpFindFileData,
+			 OFC_BOOL *more)
 {
-  BLUE_BOOL ret ;
+  OFC_BOOL ret ;
   BOOKMARK_FILE *bookmark_file ;
 
-  ret = BLUE_FALSE ;
+  ret = OFC_FALSE ;
 
   bookmark_file = BlueHandleLock (hFindFile) ;
-  if (bookmark_file != BLUE_NULL)
+  if (bookmark_file != OFC_NULL)
     {
-      *more = BLUE_FALSE ;
+      *more = OFC_FALSE ;
       if (bookmark_file->search_index < bookmark_file->search_count)
 	{
 	  ReturnNext (lpFindFileData, bookmark_file, more) ;
-	  ret = BLUE_TRUE ;
+	  ret = OFC_TRUE ;
 	}
       else
 	{
-	  BlueThreadSetVariable (BlueLastError, 
-				 (BLUE_DWORD_PTR) BLUE_ERROR_NO_MORE_FILES) ;
+	  BlueThreadSetVariable (OfcLastError, 
+				 (OFC_DWORD_PTR) OFC_ERROR_NO_MORE_FILES) ;
 	}
 
       BlueHandleUnlock (hFindFile) ;
@@ -294,18 +294,18 @@ BlueFSBookmarksFindNext (BLUE_HANDLE hFindFile,
   return (ret) ;
 }
 
-static BLUE_BOOL
+static OFC_BOOL
 BlueFSBookmarksFindClose (BLUE_HANDLE hFindFile) 
 {
-  BLUE_BOOL ret ;
+  OFC_BOOL ret ;
   BOOKMARK_FILE *bookmark_file ;
 
-  ret = BLUE_FALSE ;
+  ret = OFC_FALSE ;
 
   bookmark_file = BlueHandleLock (hFindFile) ;
-  if (bookmark_file != BLUE_NULL)
+  if (bookmark_file != OFC_NULL)
     {
-      ret = BLUE_TRUE ;
+      ret = OFC_TRUE ;
       BlueHeapFree(bookmark_file->bookmark_elements) ;
       BlueHeapFree (bookmark_file) ;
       BlueHandleDestroy (hFindFile) ;
@@ -314,17 +314,17 @@ BlueFSBookmarksFindClose (BLUE_HANDLE hFindFile)
   return (ret) ;
 }
 
-static BLUE_BOOL 
-BlueFSBookmarksGetAttributesEx (BLUE_LPCTSTR lpFileName,
-				BLUE_GET_FILEEX_INFO_LEVELS fInfoLevelId,
-				BLUE_LPVOID lpFileInformation) 
+static OFC_BOOL 
+BlueFSBookmarksGetAttributesEx (OFC_LPCTSTR lpFileName,
+				OFC_GET_FILEEX_INFO_LEVELS fInfoLevelId,
+				OFC_LPVOID lpFileInformation) 
 {
-  BLUE_BOOL ret ;
-  BLUE_WIN32_FILE_ATTRIBUTE_DATA *fFileInfo ;
+  OFC_BOOL ret ;
+  OFC_WIN32_FILE_ATTRIBUTE_DATA *fFileInfo ;
 
-  ret = BLUE_TRUE ;
-  fFileInfo = (BLUE_WIN32_FILE_ATTRIBUTE_DATA *) lpFileInformation ;
-  fFileInfo->dwFileAttributes = BLUE_FILE_ATTRIBUTE_DIRECTORY ;
+  ret = OFC_TRUE ;
+  fFileInfo = (OFC_WIN32_FILE_ATTRIBUTE_DATA *) lpFileInformation ;
+  fFileInfo->dwFileAttributes = OFC_FILE_ATTRIBUTE_DIRECTORY ;
   fFileInfo->ftCreateTime.dwLowDateTime = 0 ;
   fFileInfo->ftCreateTime.dwHighDateTime = 0 ;
   fFileInfo->ftLastAccessTime.dwLowDateTime = 0 ;
@@ -338,39 +338,39 @@ BlueFSBookmarksGetAttributesEx (BLUE_LPCTSTR lpFileName,
 
 static BLUE_FILE_FSINFO BlueFSBookmarksInfo =
   {
-    BLUE_NULL,
-    BLUE_NULL,
+    OFC_NULL,
+    OFC_NULL,
     &BlueFSBookmarksFindFirst,
     &BlueFSBookmarksFindNext,
     &BlueFSBookmarksFindClose,
-    BLUE_NULL,
+    OFC_NULL,
     &BlueFSBookmarksGetAttributesEx,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL,
-    BLUE_NULL
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL,
+    OFC_NULL
   } ;
 
-BLUE_VOID 
-BlueFSBookmarksStartup (BLUE_VOID)
+OFC_VOID 
+BlueFSBookmarksStartup (OFC_VOID)
 {
   BLUE_PATH *path ;
 
@@ -381,17 +381,17 @@ BlueFSBookmarksStartup (BLUE_VOID)
    * browse path, it will come in here
    */
   path = BluePathCreateW (TSTR("")) ;
-  if (path == BLUE_NULL)
+  if (path == OFC_NULL)
     BlueCprintf ("Couldn't Create Bookmarks Path\n") ;
   else
     {
       BluePathAddMapW (TSTR("Bookmarks"), TSTR("Bookmarks"), path, 
-		       BLUE_FS_BOOKMARKS, BLUE_TRUE) ;
+		       BLUE_FS_BOOKMARKS, OFC_TRUE) ;
     }
 }
 
-BLUE_VOID 
-BlueFSBookmarksShutdown (BLUE_VOID)
+OFC_VOID 
+BlueFSBookmarksShutdown (OFC_VOID)
 {
   BluePathDeleteMapW (TSTR("Bookmarks"));
 }

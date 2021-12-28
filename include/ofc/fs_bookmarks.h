@@ -3,8 +3,8 @@
  * Attribution-NoDerivatives 4.0 International license that can be
  * found in the LICENSE file.
  */
-#if !defined(__BLUE_FSBOOKMARKS_H__)
-#define __BLUE_FSBOOKMARKS_H__
+#if !defined(__OFC_FSBOOKMARKS_H__)
+#define __OFC_FSBOOKMARKS_H__
 
 #include "ofc/handle.h"
 #include "ofc/types.h"
@@ -22,8 +22,8 @@
 extern "C"
 {
 #endif
-  BLUE_VOID BlueFSBookmarksStartup (BLUE_VOID) ;
-  BLUE_VOID BlueFSBookmarksShutdown (BLUE_VOID);
+  OFC_VOID BlueFSBookmarksStartup (OFC_VOID) ;
+  OFC_VOID BlueFSBookmarksShutdown (OFC_VOID);
 #if defined(__cplusplus)
 }
 #endif
