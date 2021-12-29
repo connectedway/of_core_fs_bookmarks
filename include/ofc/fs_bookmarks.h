@@ -22,8 +22,11 @@
 extern "C"
 {
 #endif
-  OFC_VOID ofc_fs_bookmarks_startup (OFC_VOID) ;
-  OFC_VOID ofc_fs_bookmarks_shutdown (OFC_VOID);
+
+OFC_VOID ofc_fs_bookmarks_startup(OFC_VOID);
+
+OFC_VOID ofc_fs_bookmarks_shutdown(OFC_VOID);
+
 #if defined(__cplusplus)
 }
 #endif
