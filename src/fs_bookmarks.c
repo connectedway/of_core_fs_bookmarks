@@ -19,8 +19,8 @@
 
 #include "ofc/fs_bookmarks.h"
 /**
- * \defgroup BlueFSBookmarks Bookmark Abstraction
- * \ingroup BlueFS
+ * \defgroup fs_bookmarks Bookmark Abstraction
+ * \ingroup fs
  *
  */
 
@@ -212,7 +212,7 @@ static OFC_VOID ReturnNext (OFC_LPWIN32_FIND_DATAW lpFindFileData,
 }
 
 static OFC_HANDLE
-BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
+OfcFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
 			  OFC_LPWIN32_FIND_DATAW lpFindFileData,
 			  OFC_BOOL *more)
 {
@@ -226,8 +226,8 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
   bookmark_file = ofc_malloc (sizeof (BOOKMARK_FILE)) ;
   if (bookmark_file == OFC_NULL)
     {
-      BlueThreadSetVariable (OfcLastError, 
-			     (OFC_DWORD_PTR) OFC_ERROR_NOT_ENOUGH_MEMORY) ;
+      ofc_thread_set_variable (OfcLastError,
+                               (OFC_DWORD_PTR) OFC_ERROR_NOT_ENOUGH_MEMORY) ;
     }
   else
     {
@@ -249,8 +249,8 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
 	}
       else
 	{
-	  BlueThreadSetVariable (OfcLastError, 
-				 (OFC_DWORD_PTR) OFC_ERROR_NO_MORE_FILES) ;
+	  ofc_thread_set_variable (OfcLastError,
+                               (OFC_DWORD_PTR) OFC_ERROR_NO_MORE_FILES) ;
 	}
 
       if (hFile == OFC_INVALID_HANDLE_VALUE)
@@ -264,7 +264,7 @@ BlueFSBookmarksFindFirst (OFC_LPCTSTR lpFileName,
 }
 
 static OFC_BOOL
-BlueFSBookmarksFindNext (OFC_HANDLE hFindFile,
+OfcFSBookmarksFindNext (OFC_HANDLE hFindFile,
                          OFC_LPWIN32_FIND_DATAW lpFindFileData,
                          OFC_BOOL *more)
 {
@@ -284,8 +284,8 @@ BlueFSBookmarksFindNext (OFC_HANDLE hFindFile,
 	}
       else
 	{
-	  BlueThreadSetVariable (OfcLastError, 
-				 (OFC_DWORD_PTR) OFC_ERROR_NO_MORE_FILES) ;
+	  ofc_thread_set_variable (OfcLastError,
+                               (OFC_DWORD_PTR) OFC_ERROR_NO_MORE_FILES) ;
 	}
 
       ofc_handle_unlock (hFindFile) ;
@@ -295,7 +295,7 @@ BlueFSBookmarksFindNext (OFC_HANDLE hFindFile,
 }
 
 static OFC_BOOL
-BlueFSBookmarksFindClose (OFC_HANDLE hFindFile)
+OfcFSBookmarksFindClose (OFC_HANDLE hFindFile)
 {
   OFC_BOOL ret ;
   BOOKMARK_FILE *bookmark_file ;
@@ -315,7 +315,7 @@ BlueFSBookmarksFindClose (OFC_HANDLE hFindFile)
 }
 
 static OFC_BOOL 
-BlueFSBookmarksGetAttributesEx (OFC_LPCTSTR lpFileName,
+OfcFSBookmarksGetAttributesEx (OFC_LPCTSTR lpFileName,
 				OFC_GET_FILEEX_INFO_LEVELS fInfoLevelId,
 				OFC_LPVOID lpFileInformation) 
 {
@@ -336,15 +336,15 @@ BlueFSBookmarksGetAttributesEx (OFC_LPCTSTR lpFileName,
   return (ret) ;
 }
 
-static OFC_FILE_FSINFO BlueFSBookmarksInfo =
+static OFC_FILE_FSINFO OfcFSBookmarksInfo =
   {
     OFC_NULL,
     OFC_NULL,
-    &BlueFSBookmarksFindFirst,
-    &BlueFSBookmarksFindNext,
-    &BlueFSBookmarksFindClose,
+    &OfcFSBookmarksFindFirst,
+    &OfcFSBookmarksFindNext,
+    &OfcFSBookmarksFindClose,
     OFC_NULL,
-    &BlueFSBookmarksGetAttributesEx,
+    &OfcFSBookmarksGetAttributesEx,
     OFC_NULL,
     OFC_NULL,
     OFC_NULL,
@@ -370,11 +370,11 @@ static OFC_FILE_FSINFO BlueFSBookmarksInfo =
   } ;
 
 OFC_VOID 
-BlueFSBookmarksStartup (OFC_VOID)
+OfcFSBookmarksStartup (OFC_VOID)
 {
   OFC_PATH *path ;
 
-  ofc_fs_register (OFC_FST_BOOKMARKS, &BlueFSBookmarksInfo) ;
+  ofc_fs_register (OFC_FST_BOOKMARKS, &OfcFSBookmarksInfo) ;
   /*
    * Create a path for the IPC service.  This will add the pattern:
    * BROWSE:/ to the redirector.  When someone does a find first with the
@@ -391,7 +391,7 @@ BlueFSBookmarksStartup (OFC_VOID)
 }
 
 OFC_VOID 
-BlueFSBookmarksShutdown (OFC_VOID)
+OfcFSBookmarksShutdown (OFC_VOID)
 {
   ofc_path_delete_mapW (TSTR("Bookmarks"));
 }
