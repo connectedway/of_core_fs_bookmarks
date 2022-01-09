@@ -10,8 +10,6 @@ set(SRCS
         src/fs_bookmarks.c
         )
 
-add_library(of_core_fs_bookmarks STATIC ${SRCS})
-
-set_target_properties(of_core_fs_bookmarks PROPERTIES VERSION ${PROJECT_VERSION})
-set_target_properties(of_core_fs_bookmarks PROPERTIES SOVERSION 1)
+add_library(of_core_fs_bookmarks OBJECT ${SRCS})
+set_property(TARGET of_core_fs_bookmarks PROPERTY POSITION_INDEPENDENT_CODE ON)
 
