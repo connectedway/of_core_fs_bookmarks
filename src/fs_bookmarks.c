@@ -354,7 +354,7 @@ OfcFSBookmarksStartup(OFC_VOID) {
      */
     path = ofc_path_createW(TSTR(""));
     if (path == OFC_NULL)
-        ofc_printf("Couldn't Create Bookmarks Path\n");
+      ofc_log(OFC_LOG_WARN, "Couldn't Create Bookmarks Path\n");
     else {
         ofc_path_add_mapW(TSTR("Bookmarks"), TSTR("Bookmarks"), path,
                           OFC_FST_BOOKMARKS, OFC_TRUE);
