@@ -85,10 +85,8 @@ static OFC_VOID PopulateResults(BOOKMARK_FILE *bookmark_file,
 
 static OFC_INT FindSpot(BOOKMARK_ELEMENT *new_elements, OFC_INT new_count,
                         BOOKMARK_ELEMENT *old_element) {
-    OFC_BOOL found;
     OFC_INT i;
 
-    found = OFC_FALSE;
     i = 0;
 
     while (i < new_count && ofc_tstrncmp((OFC_TCHAR *) old_element->bookmark,
